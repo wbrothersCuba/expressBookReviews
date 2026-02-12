@@ -7,12 +7,12 @@ let users = [];
 
 const isValid = (username) => { //returns boolean
     //write code to check is the username is valid
-    return users.some((user)=>user.username === usernameuser)
+    return users.some((user)=>user.username === username)
 }
 
 const authenticatedUser = (username, password) => { //returns boolean
     //write code to check if username and password match the one we have in records.
-    let valid = user.filter((user)=>user.username === username);
+    let valid = user.filter((user)=>user.username === username && user.password === password);
     if(valid.length > 0){
         return true;   
     }else{
@@ -23,12 +23,12 @@ const authenticatedUser = (username, password) => { //returns boolean
 //only registered users can login
 regd_users.post("/login", (req, res) => {
     //Write your code here
-    const user = req.body.user;
-    if (!user) {
+    const {username, password} = req.body;
+    if (!username || !password ) {
         return res.status(404).json({ message: "Body Empty" });
     }
-    let accesToken = jwt.sign({
-        data: user
+    let accessToken = jwt.sign({
+        data: password
     }, 'access', { expiresIn: 60 * 60 });
     req.session.authorization = {
         accessToken
