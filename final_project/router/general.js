@@ -26,6 +26,17 @@ function getBooks(){
     });
 }
 
+function getBooksDetails(isbn){
+    return new Promise((resolve, reject)=>{
+        if (!books[isbn]) {
+            throw new Error("No books available fot that isbn");
+        }
+        setTimeout(()=>{
+            resolve(books[isbn]);
+        },1000);
+    });
+}
+
 // Get the book list available in the shop
 public_users.get('/', function (req, res) {
     getBooks()
@@ -40,7 +51,13 @@ public_users.get('/', function (req, res) {
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn', function (req, res) {
     const { isbn } = req.params;
-    return res.status(200).send(JSON.stringify(books[isbn]));
+    getBooksDetails(isbn)
+    .then((data)=>{
+        return res.status(200).json(data);
+    })
+    .catch((error)=>{
+        return res.status(404).json({ message: error.message });
+    })
 });
 
 // Get book details based on author
