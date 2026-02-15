@@ -60,34 +60,59 @@ public_users.get('/isbn/:isbn', function (req, res) {
     })
 });
 
-// Get book details based on author
-public_users.get('/author/:author', function (req, res) {
-    const { author } = req.params;
-    let result = [];
+function getBookDetailsByAuthor(author){
+    return new Promise((resolve, reject)=>{
+        let result = [];
     for(let key in books){
         if (books[key].author === author) {
             result.push({ [key]: books[key] });
         }
     }
     if (result.length > 0) {
-        return res.status(200).json(result);
-    }
-    return res.status(404).json({ message: "Author not found" });
+        resolve(result);
+    }else
+         throw new Error("Author not found");
+    })
+}
+
+// Get book details based on author
+public_users.get('/author/:author', function (req, res) {
+    const { author } = req.params;
+    getBookDetailsByAuthor(author)
+    .then((data)=>{
+        return res.status(200).json(data);
+    })
+    .catch((error)=>{
+        return res.status(404).json({ message: error.message });
+    })
 });
+
+function getAllBooksByTitle(title){
+    return new Promise((resolve, reject)=>{
+        let result = [];
+        for(let key in books){
+            if (books[key].title === title) {
+                result.push({ [key]: books[key] });
+            }
+        }
+        if (result.length > 0) {
+            resolve(result);
+        }
+        else
+            throw new Error("No books found with that title");
+    });
+};
 
 // Get all books based on title
 public_users.get('/title/:title', function (req, res) {
     const {title} = req.params;
-    let result = [];
-    for(let key in books){
-        if (books[key].title === title) {
-            result.push({ [key]: books[key] });
-        }
-    }
-    if (result.length > 0) {
-        return res.status(200).json(result);
-    }
-    return res.status(404).json({ message: "Title not found" });
+    getAllBooksByTitle(title)
+    .then((data)=>{
+        return res.status(200).json(data);
+    })
+    .catch((error)=>{
+        return res.status(404).json({ message: error.message });
+    })
 });
 
 //  Get book review
