@@ -12,7 +12,7 @@ const isValid = (username) => { //returns boolean
 
 const authenticatedUser = (username, password) => { //returns boolean
     //write code to check if username and password match the one we have in records.
-    let valid = user.filter((user) => user.username === username && user.password === password);
+    let valid = users.filter((user) => user.username === username && user.password === password);
     if (valid.length > 0) {
         return true;
     } else {
@@ -25,15 +25,19 @@ regd_users.post("/login", (req, res) => {
     //Write your code here
     const { username, password } = req.body;
     if (!username || !password) {
-        return res.status(404).json({ message: "Body Empty" });
+        return res.status(404).json({ message: "Username and password required"});
     }
-    let accessToken = jwt.sign({
-        data: password
-    }, 'access', { expiresIn: 60 * 60 });
-    req.session.authorization = {
-        accessToken
+    if (!authenticatedUser(username, password)) {
+        return res.status(401).json({ message: "Invalid username or password"});
+    } else {
+        let accessToken = jwt.sign({
+            data: username
+        }, 'access', { expiresIn: 60 * 60 });
+        req.session.authorization = {
+            accessToken
+        }
+        return res.status(200).send("User successfully logged in");
     }
-    return res.status(200).send("User successfully logged in");
 });
 
 // Add a book review
@@ -53,11 +57,12 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
 regd_users.delete("/auth/review/:isbn", (req, res) => {
     const username = req.user.data;
     const { isbn } = req.params;
-    if (!books[isbn]) return res.status(404).json({ message: "Book not found" });
-    delete books[isbn].reviews[username];
+    if (!books[isbn]) return res.status(404).json({ message: "Book not found" });{
+        const reviewsBooks = books[isbn].reviews; 
+        delete books[isbn].reviews[username];
+    }
     return res.status(202).json({
-        message: "Review deleted successfully",
-        reviews: reviewsBooks,
+        message: "Review deleted successfully"
     });
 });
 
