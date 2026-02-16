@@ -1,9 +1,9 @@
+require('dotenv').config();
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const session = require('express-session')
 const customer_routes = require('./router/auth_users.js').authenticated;
 const genl_routes = require('./router/general.js').general;
-
 const app = express();
 
 app.use(express.json());
